@@ -5,7 +5,7 @@ from threading import Condition
 import win32clipboard
 
 class clipboard():
-    def __init__(self, key_word_url):
+    def __init__(self, key_word_url="https://e-hentai.org/g/"):
         self.url = key_word_url
         self.thread = threading.Thread(target=self.monitor_clipboard, daemon=True)
         self.condition = Condition()

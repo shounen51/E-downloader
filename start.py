@@ -7,10 +7,11 @@ if __name__ == "__main__":
     with open("config.yaml", "r") as file:
         data = yaml.safe_load(file)
     download_dir = data["downloadPath"]
-    cb = clipboard(key_word_url="https://e-hentai.org/g/")
+    cb = clipboard()
     cb.start()
     while True:
+        print("Ready for download. Copy a url.")
         url = cb.get_url()
-        print(f"get_url {url}")
+        print(f"get url {url}")
         d = downloader(download_dir=download_dir)
         d.download(url)

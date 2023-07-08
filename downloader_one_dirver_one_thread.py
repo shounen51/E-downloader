@@ -111,12 +111,11 @@ class downloader():
                 while self.driver.find_element(By.XPATH, '/html/body').text.startswith("You have reached the image limit"):
                     print("Download readched limit. Sleep 1 hour or change your ip.")
                     self.page_queue.put(page_url)
-                    CHANGE_IP = self.ip_checker.wait_ip_change(60*60)
-                    if CHANGE_IP:
-                        self.driver.quit()
-                        self.driver = my_driver()
-                        dir = self.download_dir / self.title
-                        self.driver.enable_download_in_headless_chrome(self.driver, dir)
+                    self.ip_checker.wait_ip_change(60*60)
+                    self.driver.quit()
+                    self.driver = my_driver()
+                    dir = self.download_dir / self.title
+                    self.driver.enable_download_in_headless_chrome(self.driver, dir)
             except:
                 pass
 
