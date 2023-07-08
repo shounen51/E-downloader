@@ -66,7 +66,7 @@ class downloader():
         self.download_count = 1
 
     def download(self, url):
-        self.url = url
+        self.url = url.split("?")[0]
         self.main_thread.start()
 
     def __trans_2_legal_dir(self, path:str):
@@ -88,6 +88,7 @@ class downloader():
             self.driver.enable_download_in_headless_chrome(self.download_dir)
             text = self.driver.find_element(By.XPATH, '//*[@id="gdd"]/table/tbody/tr[6]/td[2]').text
             total_images = int(text.split(" ")[0])
+            print(f"{total_images} pics to download. Fetching image urls")
             self.page_queue = Queue(total_images)
             while not self.page_queue.full():
                 pages = self.driver.find_element(By.XPATH, '//*[@id="gdt"]').find_elements(By.CLASS_NAME, "gdtl")
@@ -112,7 +113,6 @@ class downloader():
             self.driver.enable_download_in_headless_chrome(self.download_dir)
 
         with self.driver:
-            page_url = page_url.split("?")[0]
             print(f"start download {page_url}")
             try:
                 self.driver.get(page_url)
