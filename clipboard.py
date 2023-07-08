@@ -38,13 +38,11 @@ class clipboard():
         while True:
             current_data = self.get_clipboard_text()
             if current_data != last_data:
-
                 last_data = current_data
                 if current_data.startswith(self.url):
                     self.copy_url = current_data
                     with self.condition:
                         self.condition.notify()
-                        print("clipboard notify")
             time.sleep(2)
 
 if __name__ == "__main__":
