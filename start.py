@@ -8,12 +8,12 @@ from downloader_one_dirver_one_thread import downloader
 from utils import self_restart, update_package
 
 if __name__ == "__main__":    
-    print(" version: 1.7.1")
+    print(" version: 1.7.2")
     with open("config.yaml", "r") as file:
         data = yaml.safe_load(file)
-    user_dir = Path(os.path.expandvars(data["userDir"]))
+    user_dir = Path(os.path.abspath(data["userDir"]))
 
-    first_time = not os.path.exists(str(user_dir))
+    first_time = not os.path.exists(str(user_dir)+".lnk")
     if first_time:
         print(" 第一次使用先開啟 chrome 搜尋 chrome://version/\n\
  把設定檔路徑的資料夾建立一個捷徑在 E-Downloader 資料夾中，並且命名為 profile\n \
