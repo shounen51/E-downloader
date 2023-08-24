@@ -1,2 +1,4 @@
 downloadPath: D:\e-download
+userDir: "profile"
 auto: 0
+checkUpdate: 0

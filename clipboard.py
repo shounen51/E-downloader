@@ -16,17 +16,22 @@ class clipboard():
 
     def get_clipboard_text(self):
         win32clipboard.OpenClipboard()
+        data = ""
         try:
             data = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT)
         except:
-            return ""
-        finally:
+            pass
+        try:
             win32clipboard.CloseClipboard()
+        except:
+            pass     
+        
         try:
             if isinstance(data, bytes):
                 return data.decode("utf-8")
         except:
-            return ""
+            pass
+        return ""
 
     def get_url(self):
         with self.condition:

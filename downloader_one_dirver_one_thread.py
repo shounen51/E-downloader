@@ -14,14 +14,19 @@ from selenium.webdriver.chrome.options import Options
 from ip_checker import ip_checker
 
 class my_driver(webdriver.Chrome):
-    def __init__(self):
+    def __init__(self, user_data:Path):
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--log-level=3")
-        user_data = os.path.expandvars("%userprofile%/AppData/Local/Google/Chrome/User Data")
-        chrome_options.add_argument(f"--user-data-dir={user_data}") 
-        chrome_options.add_argument("--profile-directory=Defult")
-        chrome_options.add_argument("--download.protects=true")
+        chrome_options.add_argument("--log-level=1")
+        user_dir = os.path.expandvars("%userprofile%/AppData/Local/Google/Chrome/User Data")
+        chrome_options.add_argument(f"--user-data-dir={str(user_dir)}") 
+        chrome_options.add_argument(f"--profile-directory={str(user_data.name)}")
+        chrome_options.add_argument("--origin-trial-disabled-features=WebGPU")
+        chrome_options.add_argument("--flag-switches-begin")
+        chrome_options.add_argument("--flag-switches-end")
+        chrome_options.add_argument('--ignore-certificate-errors')
+        chrome_options.add_argument('--ignore-ssl-errors')
+        chrome_options.add_argument("--disable-cache")
         super().__init__(chrome_options)
         self._LOCK = False
         self._wait_count = 0
@@ -54,11 +59,11 @@ class my_driver(webdriver.Chrome):
         command_result = self.execute("send_command", params)
 
 class downloader():
-    def __init__(self, target_dir:Path):
+    def __init__(self, target_dir:Path, user_data:Path):
         self.temp_dir = Path(os.path.expandvars('%temp%/E-download/'))
         self.temp_dir.mkdir(exist_ok=True)
         self.target_dir = target_dir
-        self.driver = my_driver()
+        self.driver = my_driver(user_data)
         self.ip_checker = ip_checker()
         self.url = ""
         self.main_thread = threading.Thread(target=self.run, daemon=True)
@@ -92,7 +97,8 @@ class downloader():
             print(f"{total_images} pics to download. Fetching image urls")
             self.page_queue = Queue(total_images)
             while not self.page_queue.full():
-                pages = self.driver.find_element(By.XPATH, '//*[@id="gdt"]').find_elements(By.CLASS_NAME, "gdtl")
+                pages = self.driver.find_element(By.XPATH, '//*[@id="gdt"]').find_elements(By.CLASS_NAME, "gdtm")
+                if len(pages) == 0: pages = self.driver.find_element(By.XPATH, '//*[@id="gdt"]').find_elements(By.CLASS_NAME, "gdtl")
                 for p in pages:
                     url = p.find_element(By.TAG_NAME, 'a').get_property('href')
                     print(url)
@@ -131,11 +137,27 @@ class downloader():
                 print(f"fail to download {page_url}. no element")
                 return
             download_url.click()
+            time.sleep(2)
             try:
-                while self.driver.find_element(By.XPATH, '/html/body').text.startswith("You have reached the image limit"):
-                    print("Download readched limit. Sleep 1 hour or change your ip.")
+                if self.driver.find_element(By.XPATH, '/html/body').text.startswith("You have reached the image limit"):
+                    print("下載已達上限流量 等待一小時後自動重或開啟VPN(會以區網IP自動判定是否開啟")
                     self.ip_checker.wait_ip_change(60*60)
                     __skip_to_last(page_url)
+                    return
+            except:
+                pass
+            try:
+                if self.driver.find_element(By.XPATH, '/html/body').text.startswith("Downloading original files of this gallery during peak hours requires GP"):
+                    print("現在是尖峰時段無法下載 等待一小時後重試")
+                    self.ip_checker.wait_ip_change(60*60)
+                    __skip_to_last(page_url)
+                    return
+            except:
+                pass
+            try:
+                if self.driver.find_element(By.XPATH, '/html/body/div/form/table/tbody/tr[1]/td[1]').text.startswith("User"):
+                    print("你還沒登入 使用chrome預設使用者登入網站")
+                    return
             except:
                 pass
             self.__rename_loop()
@@ -163,10 +185,14 @@ class downloader():
             if mv_file is not None:
                 while not is_file_written(mv_file):
                     pass
-                shutil.copy(str(f), str(self.target_dir / (self.title + f"_{self.download_count}" + f.suffix)))
-                f.unlink()
-                self.download_count += 1
-                break
+                try:
+                    shutil.copy(str(f), str(self.target_dir / (self.title + f"_{self.download_count}" + f.suffix)))
+                    f.unlink()
+                    self.download_count += 1
+                    break
+                except:
+                    print("Move file failed. Retry...")
+                
             time.sleep(1)
 
     def run(self):
@@ -184,6 +210,6 @@ class downloader():
         self.main_thread.join()
 
 if __name__ == "__main__":
-    d = downloader(r"D:\e-download")
+    d = downloader(Path(r"D:\e-download"))
     d.download("https://e-hentai.org/g/2522327/90bed708f0/")
     time.sleep(300)
