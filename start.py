@@ -9,7 +9,7 @@ from downloader_one_dirver_one_thread import downloader
 from utils import self_restart, update_package
 
 if __name__ == "__main__":    
-    print("version: 1.17")
+    print("version: 1.7")
     with open("config.yaml", "r") as file:
         data = yaml.safe_load(file)
     user_dir = Path(os.path.expandvars(data["userDir"]))
