@@ -2,19 +2,18 @@ import yaml
 from pathlib import Path
 import os
 import sys
-import shutil
 
 from clipboard import clipboard
 from downloader_one_dirver_one_thread import downloader
 from utils import self_restart, update_package
 
 if __name__ == "__main__":    
-    print("version: 1.7")
+    print(" version: 1.7.1")
     with open("config.yaml", "r") as file:
         data = yaml.safe_load(file)
     user_dir = Path(os.path.expandvars(data["userDir"]))
 
-    first_time = not user_dir.exists()
+    first_time = not os.path.exists(str(user_dir))
     if first_time:
         print(" 第一次使用先開啟 chrome 搜尋 chrome://version/\n\
  把設定檔路徑的資料夾建立一個捷徑在 E-Downloader 資料夾中，並且命名為 profile\n \
@@ -26,11 +25,11 @@ if __name__ == "__main__":
     if data["checkUpdate"]:
         update_package("selenium")
     else:
-        print(" \
-              ******************************************\n\
+        print("\
+              *******************************************\n\
               *** 更新 chrome 後將 checkUpdate 改為 1 ***\n\
               ***    將 auto 改為 1 自動下載不用 Y    ***\n\
-              ******************************************")
+              *******************************************")
 
     download_dir = Path(data["downloadPath"])
     if not download_dir.is_absolute():

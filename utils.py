@@ -1,12 +1,6 @@
 import os
 import sys
 import subprocess
-from pathlib import Path
-import pythoncom
-import ctypes
-from ctypes import wintypes
-
-import winshell
 
 def self_restart():
     if getattr(sys, 'frozen', False):
